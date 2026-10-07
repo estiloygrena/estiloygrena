@@ -1,0 +1,1 @@
+export default function Loading() { return <main className="grid min-h-screen place-items-center bg-black px-5 text-white" aria-live="polite" aria-busy="true"><div className="w-full max-w-sm"><p className="eyebrow text-white/45">Estilo y Greña / Cargando</p><div className="loading-bar mt-5" /><p className="display mt-6 text-5xl">Un momento.</p></div></main>; }

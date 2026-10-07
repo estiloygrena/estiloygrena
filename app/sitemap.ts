@@ -1,0 +1,2 @@
+import type { MetadataRoute } from "next";
+export default function sitemap(): MetadataRoute.Sitemap { const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"; return ["", "/servicios", "/galeria", "/agendar", "/privacidad", "/politica-de-cancelacion"].map((path) => ({ url: `${base}${path}`, lastModified: new Date(), changeFrequency: ["", "/galeria"].includes(path) ? "weekly" : "monthly" })); }

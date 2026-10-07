@@ -1,0 +1,3 @@
+import Link from "next/link";
+import { PublicShell } from "@/components/public-shell";
+export default async function Pending({ searchParams }: { searchParams: Promise<{ cita?: string }> }) { const { cita } = await searchParams; return <PublicShell><main className="min-h-[620px] px-5 py-20 sm:px-10"><p className="eyebrow">Pago pendiente</p><h1 className="display mt-4 text-6xl sm:text-8xl">Aún<br />no termina.</h1><p className="mt-8 max-w-lg text-white/70">Tu horario queda apartado por unos minutos mientras Mercado Pago procesa el pago.</p>{cita && <Link className="btn mt-10" href={`/cita/${encodeURIComponent(cita)}`}>Consultar cita →</Link>}</main></PublicShell>; }

@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Estilo y Greña
 
-## Getting Started
+Sitio y sistema de reservas para un salón de cortes alternativos. Está construido con Next.js App Router, TypeScript, Tailwind CSS, Prisma, Neon PostgreSQL, Mercado Pago y Cloudflare R2.
 
-First, run the development server:
+## Requisitos
+
+- Node.js 20 o superior
+- pnpm 10
+- Una base de datos PostgreSQL en Neon
+- Credenciales de Mercado Pago para cobros en línea
+- Un bucket público de Cloudflare R2 para imágenes
+
+No requiere Docker.
+
+## Inicio local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env
+pnpm prisma:generate
+pnpm prisma:migrate
+pnpm prisma:seed
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+En Windows PowerShell puede ser necesario ejecutar `pnpm.cmd` si la política local bloquea el shim `pnpm.ps1`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de entorno
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copia `.env.example` a `.env`. `DATABASE_URL` debe ser la URL de conexión agrupada (pooled) de Neon con SSL. El administrador se define exclusivamente mediante `ADMIN_USERNAME`, `ADMIN_PASSWORD` y un `ADMIN_SESSION_SECRET` aleatorio de al menos 32 caracteres. No se crean usuarios en la base de datos.
 
-## Learn More
+Configura en Mercado Pago:
 
-To learn more about Next.js, take a look at the following resources:
+- `MERCADO_PAGO_ACCESS_TOKEN` con el token privado.
+- `NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY` con la clave pública (reservada para una futura integración visual de Bricks; el flujo actual usa Checkout Pro).
+- `MERCADO_PAGO_WEBHOOK_SECRET` con la firma secreta del webhook.
+- La URL de notificaciones será `https://tu-dominio.com/api/webhooks/mercadopago`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Configura R2 con una API Token que tenga permiso de lectura/escritura sobre el bucket. `R2_PUBLIC_URL` debe ser la URL pública del bucket o del dominio personalizado, sin ruta final. Reinicia Next.js después de cambiarla para que el optimizador de imágenes actualice sus patrones remotos.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`NEXT_PUBLIC_APP_URL` debe ser el origen público exacto y HTTPS en producción. Se usa para metadatos, retornos de pago y webhooks.
 
-## Deploy on Vercel
+## Base de datos
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+La migración inicial crea modelos, índices y una restricción PostgreSQL `EXCLUDE` sobre rangos de tiempo para impedir citas activas superpuestas incluso si dos solicitudes llegan simultáneamente. El cálculo de disponibilidad también valida horario semanal, excepciones, bloqueos, duración completa, citas y reservas de pago temporales.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Los servicios admiten `FIXED` (precio fijo) o `QUOTE` (cotización). Los servicios cotizados conservan duración y disponibilidad normales, pero guardan importe nulo, una etiqueta de cotización histórica y nunca pueden iniciar Mercado Pago. La migración `20260924000000_service_quote_pricing` convierte de forma segura los servicios y citas existentes a `FIXED` sin borrar sus precios.
+
+Para aplicar migraciones en producción:
+
+```bash
+pnpm prisma migrate deploy
+```
+
+La semilla agrega servicios de ejemplo, horario de martes a sábado de 11:00 a 20:00 y configuración pública editable.
+
+## Logo e imágenes
+
+Coloca el logo real y transparente en `public/logo.png`; mientras no exista, el sitio muestra un wordmark tipográfico. Las fotos se suben desde `/admin/galeria`, se validan y guardan en R2. PostgreSQL almacena solamente la metadata y URL.
+
+## Comandos de verificación
+
+```bash
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+## Despliegue
+
+El proyecto es compatible con Vercel. Añade todas las variables de `.env.example`, ejecuta `prisma migrate deploy` contra Neon y registra el webhook público en Mercado Pago. La lista de intentos fallidos de login se limita en memoria por instancia; en una operación con alto tráfico conviene sustituirla por un rate limiter distribuido.
+
+Antes de publicar, revisa los textos provisionales de privacidad y cancelación con la persona responsable del negocio.
