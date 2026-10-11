@@ -10,6 +10,9 @@ const at = (time: string) => DateTime.fromISO(`${date}T${time}`, { zone }).toUTC
 const run = (options: Partial<Parameters<typeof calculateAvailableSlots>[0]> = {}) => calculateAvailableSlots({ date, durationMinutes: 60, slotIntervalMinutes: 30, weekly, exceptions: [], blocked: [], appointments: [], now, ...options });
 
 describe("calculateAvailableSlots", () => {
+  it("falls back to a safe interval for invalid settings instead of hanging", () => {
+    for (const slotIntervalMinutes of [0, -30, Number.NaN, 0.5, 241]) expect(run({ slotIntervalMinutes })).toEqual(run());
+  });
   it("returns slots on a normal open day", () => expect(run()).toEqual(["10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00"]));
   it("returns none on a closed day", () => expect(run({ date: "2026-10-05" })).toEqual([]));
   it("honors a closed date exception", () => expect(run({ exceptions: [{ type: "CLOSED", startTime: null, endTime: null }] })).toEqual([]));

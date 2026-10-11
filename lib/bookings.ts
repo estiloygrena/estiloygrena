@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { calculateAvailableSlots, localSlotToUtc } from "@/lib/availability";
 import {
   ACTIVE_APPOINTMENT_STATUSES,
-  DEFAULT_SLOT_INTERVAL,
+  validSlotInterval,
   PAYMENT_HOLD_MINUTES,
   SALON_TIMEZONE,
 } from "@/lib/constants";
@@ -73,7 +73,7 @@ export async function createBooking(rawInput: unknown) {
         date: input.date,
         durationMinutes: service.durationMinutes,
         slotIntervalMinutes:
-          Number(intervalSetting?.value) || DEFAULT_SLOT_INTERVAL,
+          validSlotInterval(intervalSetting?.value),
         weekly,
         exceptions,
         blocked,

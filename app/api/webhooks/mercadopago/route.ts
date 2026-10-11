@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return NextResponse.json({ ok: true });
-    console.error("mercadopago_webhook_failed", error);
+    console.error("mercadopago_webhook_failed");
     return NextResponse.json({ error: "Webhook no procesado." }, { status: 500 });
   }
 }

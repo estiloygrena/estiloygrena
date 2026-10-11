@@ -66,7 +66,7 @@ function ServiceForm({
             name="image"
             accept="image/jpeg,image/png,image/webp,image/avif"
           />
-          <small className="mt-2 block text-black/50">JPG, PNG, WebP o AVIF. Máximo 10 MB; se guarda en Cloudflare R2.</small>
+          <small className="mt-2 block text-black/50">JPG, PNG, WebP o AVIF. Máximo 10 MB.</small>
         </label>
       </div>
       <label className="mt-4 flex items-center gap-2 text-sm font-bold">
@@ -75,7 +75,7 @@ function ServiceForm({
           name="isActive"
           defaultChecked={service?.isActive ?? true}
         />{" "}
-        Visible y reservable
+        Disponible para reservar
       </label>
       {service?.imageKey && (
         <label className="mt-3 flex items-center gap-2 text-sm font-bold">
@@ -108,8 +108,8 @@ export default async function ServicesPage() {
   });
   return (
     <main className="p-5 sm:p-8">
-      <p className="eyebrow">Catálogo editable</p>
-      <h1 className="display mt-2 text-5xl sm:text-7xl">Servicios.</h1>
+      <p className="eyebrow">Administrar servicios</p>
+      <h1 className="display mt-2 text-5xl sm:text-7xl">Servicios</h1>
       <section className="mt-8">
         <h2 className="mb-4 text-xl font-black uppercase">Nuevo servicio</h2>
         <ServiceForm />
@@ -142,7 +142,7 @@ export default async function ServicesPage() {
           ))}
           {!services.length && (
             <p className="border-2 border-black p-8 text-black/50">
-              No hay servicios todavía. Crea el primero arriba.
+              No hay servicios registrados. Agrega uno con el formulario.
             </p>
           )}
         </div>

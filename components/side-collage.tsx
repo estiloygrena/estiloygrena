@@ -1,13 +1,13 @@
-import Image from "next/image";
-import { db } from "@/lib/db";
+import { HaircutImage } from "@/components/haircut-image";
+import { SIDE_CORTES, localCorte } from "@/lib/cortes";
 
-export async function SideCollages() {
-  const images = process.env.DATABASE_URL
-    ? await db.galleryImage
-        .findMany({ where: { isActive: true }, orderBy: [{ isFeatured: "desc" }, { displayOrder: "asc" }], take: 6 })
-        .catch(() => [])
-    : [];
-  return <div className="pointer-events-none fixed inset-0 z-0 hidden xl:block" aria-hidden="true">
-    {(["left", "right"] as const).map((side) => <aside className={`absolute inset-y-0 ${side}-0 w-[calc((100vw-1040px)/2)] overflow-hidden p-2 2xl:p-4`} key={side}><div className={`grid h-full gap-2 2xl:gap-4 ${side === "left" ? "grid-rows-[1.2fr_.8fr_1fr]" : "grid-rows-[.8fr_1.25fr_.75fr]"}`}>{Array.from({ length: 3 }).map((_, index) => { const image = images[index + (side === "right" ? 3 : 0)]; return image ? <div className={`relative overflow-hidden border border-white/30 ${side === "left" ? "odd:-rotate-1" : "even:rotate-1"}`} key={image.id}><Image className="object-cover grayscale contrast-125 transition duration-700" src={image.url} alt="" fill sizes="15vw" /></div> : <div className="poster-placeholder !min-h-0 opacity-70" key={index} />; })}</div></aside>)}
+export function SideCollages() {
+  return <div className="side-collages pointer-events-none fixed inset-0 z-0" aria-hidden="true">
+    {(["left", "right"] as const).map((side) => <aside className={`collage-rail collage-${side}`} key={side}>
+      <div className="collage-strip">{SIDE_CORTES.slice(side === "left" ? 0 : 3, side === "left" ? 3 : 6).map((photo, index) => <div className={`collage-photo collage-photo-${index}`} key={photo.filename}>
+        <HaircutImage src={localCorte(photo.filename)} alt="" fill sizes="(min-width: 1440px) 200px, 140px" className="object-cover grayscale contrast-110" style={{ objectPosition: photo.position }} />
+        <span className="absolute bottom-2 left-2 bg-black px-2 py-1 text-[9px] font-bold tracking-widest">{photo.filename.slice(6, 9)} / EG</span>
+      </div>)}</div>
+    </aside>)}
   </div>;
 }

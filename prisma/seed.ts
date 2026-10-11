@@ -1,4 +1,6 @@
+import "../scripts/load-env";
 import { PrismaClient } from "@prisma/client";
+import { DEFAULT_SETTINGS } from "../lib/constants";
 
 const prisma = new PrismaClient();
 
@@ -7,7 +9,7 @@ async function main() {
     {
       name: "Corte Alternativo",
       slug: "corte-alternativo",
-      description: "Forma, textura y una silueta hecha para ti.",
+      description: "Corte alternativo según el estilo que buscas.",
       pricingType: "FIXED" as const,
       priceCents: 35000,
       quoteLabel: null,
@@ -16,7 +18,7 @@ async function main() {
     {
       name: "Corte + Diseño",
       slug: "corte-diseno",
-      description: "Corte con diseño gráfico, líneas o detalle creativo.",
+      description: "Corte con líneas o detalles de diseño.",
       pricingType: "FIXED" as const,
       priceCents: 45000,
       quoteLabel: null,
@@ -25,7 +27,7 @@ async function main() {
     {
       name: "Fleco",
       slug: "fleco",
-      description: "Ajuste o transformación de fleco.",
+      description: "Corte o ajuste de fleco.",
       pricingType: "FIXED" as const,
       priceCents: 18000,
       quoteLabel: null,
@@ -34,7 +36,7 @@ async function main() {
     {
       name: "Color Fantasía",
       slug: "color-fantasia",
-      description: "Color creativo personalizado según largo, base y técnica.",
+      description: "Color fantasía. Se cotiza según el largo, la base y la técnica.",
       pricingType: "QUOTE" as const,
       priceCents: null,
       quoteLabel: "Se cotiza por WhatsApp",
@@ -44,7 +46,7 @@ async function main() {
       name: "Corrección de Color",
       slug: "correccion-color",
       description:
-        "Diagnóstico y corrección técnica de color previa valoración.",
+        "Corrección de color con valoración previa.",
       pricingType: "QUOTE" as const,
       priceCents: null,
       quoteLabel: "Precio sujeto a valoración",
@@ -55,11 +57,7 @@ async function main() {
   for (const [displayOrder, service] of services.entries()) {
     await prisma.service.upsert({
       where: { slug: service.slug },
-      update: {
-        pricingType: service.pricingType,
-        priceCents: service.priceCents,
-        quoteLabel: service.quoteLabel,
-      },
+      update: {},
       create: { ...service, displayOrder },
     });
   }
@@ -74,26 +72,14 @@ async function main() {
     });
   }
 
-  const settings = {
-    salonName: "Estilo y Greña",
-    tagline: "Cortes sin molde.",
-    address:
-      "Gral. Plutarco Elías Calles 3216, Riberas del Río, 67160 Guadalupe, N.L., México",
-    instagramUrl: "https://instagram.com/estiloygrena",
-    whatsappNumber: "528100000000",
-    googleMapsUrl:
-      "https://www.google.com/maps/search/?api=1&query=Estilo%20y%20Gre%C3%B1a%2C%20Gral.%20Plutarco%20El%C3%ADas%20Calles%203216%2C%20Riberas%20del%20R%C3%ADo%2C%2067160%20Guadalupe%2C%20N.L.%2C%20M%C3%A9xico",
-    slotIntervalMinutes: "30",
-    cancellationPolicy:
-      "Avísanos con al menos 24 horas de anticipación para mover o cancelar tu cita.",
-  };
+  const settings = DEFAULT_SETTINGS;
   for (const [key, value] of Object.entries(settings)) {
     await prisma.siteSetting.upsert({
       where: { key },
-      update: ["address", "googleMapsUrl"].includes(key) ? { value } : {},
+      update: {},
       create: { key, value },
     });
   }
 }
 
-main().finally(() => prisma.$disconnect());
+main().then(() => console.log("Semilla completada; se conservaron los registros existentes.")).catch(() => { console.error("No se pudo completar la semilla. Verifica conexión y migraciones."); process.exitCode = 1; }).finally(() => prisma.$disconnect());

@@ -5,7 +5,7 @@ import { logoutAction } from "@/app/admin/actions";
 import { SubmitButton } from "@/components/submit-button";
 
 const nav = [
-  ["Dashboard", "/admin"],
+  ["Resumen", "/admin"],
   ["Citas", "/admin/citas"],
   ["Calendario", "/admin/calendario"],
   ["Servicios", "/admin/servicios"],
@@ -24,7 +24,7 @@ export function AdminNav() {
           Estilo
           <br />y Greña
         </Link>
-        <p className="eyebrow mt-4 text-white/45">Panel / Backstage</p>
+        <p className="eyebrow mt-4 text-white/45">Administración</p>
       </div>
       <nav className="flex overflow-x-auto lg:grid">
         {nav.map(([label, href], index) => {

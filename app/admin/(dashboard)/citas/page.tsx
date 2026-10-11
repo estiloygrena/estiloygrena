@@ -19,7 +19,7 @@ const statusLabels = {
 const paymentLabels = {
   PENDING: "Pendiente",
   PAID: "Pagado",
-  FAILED: "Fallido",
+  FAILED: "No completado",
   REFUNDED: "Reembolsado",
   NOT_REQUIRED: "En el local",
 } as const;
@@ -78,8 +78,8 @@ export default async function AppointmentsPage({
   ]);
   return (
     <main className="p-5 sm:p-8">
-      <p className="eyebrow">Reservas / Lista</p>
-      <h1 className="display mt-2 text-5xl sm:text-7xl">Citas.</h1>
+      <p className="eyebrow">Administrar citas</p>
+      <h1 className="display mt-2 text-5xl sm:text-7xl">Citas</h1>
       <div className="mt-6 flex flex-wrap gap-2">
         {["Todas", ...validStatuses].map((item) => (
           <a
@@ -131,7 +131,7 @@ export default async function AppointmentsPage({
           aria-label="Método de pago"
         >
           <option value="">Cualquier método</option>
-          <option value="CASH">Pago local</option>
+          <option value="CASH">Pago en el local</option>
           <option value="MERCADO_PAGO">Mercado Pago</option>
           <option value="QUOTE">Por definir</option>
         </select>
@@ -144,7 +144,7 @@ export default async function AppointmentsPage({
           <option value="">Cualquier pago</option>
           <option value="PENDING">Pendiente</option>
           <option value="PAID">Pagado</option>
-          <option value="FAILED">Fallido</option>
+          <option value="FAILED">No completado</option>
           <option value="REFUNDED">Reembolsado</option>
           <option value="NOT_REQUIRED">No requerido</option>
         </select>
@@ -197,7 +197,7 @@ export default async function AppointmentsPage({
                 {appointment.paymentMethod === "QUOTE"
                   ? "Por definir"
                   : appointment.paymentMethod === "CASH"
-                    ? "Pago local"
+                    ? "Pago en el local"
                     : "Mercado Pago"}{" "}
                 / {appointment.servicePricingTypeSnapshot === "QUOTE"
                   ? "Cotización pendiente"

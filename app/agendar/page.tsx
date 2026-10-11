@@ -6,7 +6,7 @@ import { getSettings } from "@/lib/settings";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Agenda tu cita",
-  description: "Reserva tu cita de corte, diseño o color en Estilo y Greña.",
+  description: "Agenda tu cita en Estilo y Greña, peluquería en Guadalupe, Nuevo León. Selecciona un servicio, fecha y horario.",
 };
 
 export default async function BookingPage({

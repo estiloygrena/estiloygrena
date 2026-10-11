@@ -6,17 +6,17 @@ export default async function SettingsPage() {
   const settings = await getSettings();
   const fields = [
     ["salonName", "Nombre del salón"],
-    ["tagline", "Frase"],
+    ["tagline", "Descripción breve"],
     ["address", "Dirección"],
-    ["instagramUrl", "Instagram URL"],
+    ["instagramUrl", "Enlace de Instagram"],
     ["whatsappNumber", "WhatsApp (con lada)"],
-    ["googleMapsUrl", "Google Maps URL"],
+    ["googleMapsUrl", "Enlace de Google Maps"],
     ["slotIntervalMinutes", "Intervalo de citas / min"],
   ] as const;
   return (
     <main className="p-5 sm:p-8">
       <p className="eyebrow">Información pública</p>
-      <h1 className="display mt-2 text-5xl sm:text-7xl">Configuración.</h1>
+      <h1 className="display mt-2 text-5xl sm:text-7xl">Configuración</h1>
       <form
         action={saveSettingsAction}
         className="mt-8 grid gap-5 border-2 border-black bg-white p-5 sm:grid-cols-2"
@@ -27,8 +27,11 @@ export default async function SettingsPage() {
             <input
               className="field !border-black !text-black"
               name={name}
+              type={name === "slotIntervalMinutes" ? "number" : name.endsWith("Url") ? "url" : "text"}
+              min={name === "slotIntervalMinutes" ? 1 : undefined}
+              max={name === "slotIntervalMinutes" ? 240 : undefined}
               defaultValue={settings[name]}
-              required
+              required={name !== "whatsappNumber" && name !== "instagramUrl"}
             />
           </label>
         ))}

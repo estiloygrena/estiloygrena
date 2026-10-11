@@ -1,4 +1,5 @@
-import Image from "next/image";
+import { HaircutImage } from "@/components/haircut-image";
+import { importedCorte, localCorte } from "@/lib/cortes";
 import Link from "next/link";
 import { PublicShell } from "@/components/public-shell";
 import { db } from "@/lib/db";
@@ -8,7 +9,7 @@ import { servicePriceLabel } from "@/lib/service-pricing";
 export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Servicios",
-  description: "Cortes alternativos, diseño, fleco y color en Monterrey.",
+  description: "Conoce los servicios de Estilo y Greña en Guadalupe, Nuevo León. Consulta precios, duración y opciones de cotización.",
 };
 
 export default async function ServicesPage() {
@@ -24,11 +25,11 @@ export default async function ServicesPage() {
     <PublicShell>
       <main>
         <header className="border-b-2 border-white px-5 py-14 sm:px-10 sm:py-20">
-          <p className="eyebrow text-white/55">Catálogo / Precios en MXN</p>
-          <h1 className="display mt-4 text-7xl sm:text-9xl">Servicios.</h1>
+          <p className="eyebrow text-white/55">Servicios / Precios en pesos mexicanos</p>
+          <h1 className="display mt-4 text-7xl sm:text-9xl">Servicios</h1>
           <p className="mt-7 max-w-xl text-lg text-white/65">
-            Elige la base. En la silla afinamos la forma, la textura y el nivel
-            de ruido.
+            Consulta los servicios, su duración y precio.
+            Algunos requieren cotización antes de tu cita.
           </p>
         </header>
         {services.length ? (
@@ -62,7 +63,7 @@ export default async function ServicesPage() {
                           {servicePriceLabel(service, formatMoney)}
                         </b>
                         <small className="eyebrow text-white/45">
-                          {service.pricingType === "QUOTE" ? "Cotización" : "Precio base"}
+                          {service.pricingType === "QUOTE" ? "Cotización" : "Precio fijo"}
                         </small>
                       </span>
                       <span className="text-right">
@@ -76,18 +77,20 @@ export default async function ServicesPage() {
                       className="btn mt-6 group-hover:bg-white group-hover:text-black"
                       href={`/agendar?servicio=${service.id}`}
                     >
-                      Elegir este servicio →
+                      Seleccionar servicio →
                     </Link>
                   </div>
                 </div>
                 {service.imageUrl && (
-                  <div className="relative hidden min-h-64 overflow-hidden border-t border-white/40 sm:block">
-                    <Image
+                  <div className="relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden border-t border-white/40">
+                    <HaircutImage
                       className="object-cover grayscale transition duration-500 group-hover:scale-[1.03] group-hover:grayscale-0"
                       src={service.imageUrl}
+                      fallbackSrc={service.imageKey && importedCorte(service.imageKey) ? localCorte(importedCorte(service.imageKey)!.filename) : undefined}
                       alt={`Resultado de ${service.name}`}
                       fill
-                      sizes="50vw"
+                      sizes="(max-width: 640px) 90vw, 384px"
+                      style={{ objectPosition: service.imageKey ? importedCorte(service.imageKey)?.position ?? "50% 40%" : "50% 40%" }}
                     />
                   </div>
                 )}
@@ -96,26 +99,26 @@ export default async function ServicesPage() {
           </div>
         ) : (
           <section className="px-5 py-24 text-center sm:px-10">
-            <p className="eyebrow text-white/45">Catálogo en edición</p>
-            <h2 className="display mt-4 text-5xl">Afilando las tijeras.</h2>
+            <p className="eyebrow text-white/45">Servicios en línea</p>
+            <h2 className="display mt-4 text-5xl">No disponibles</h2>
             <p className="mx-auto mt-5 max-w-md text-white/60">
-              Los servicios estarán disponibles aquí muy pronto. Escríbenos para
-              consultar.
+              Por ahora no hay servicios disponibles en línea. Contáctanos
+              para consultar.
             </p>
           </section>
         )}
         <section className="flex flex-col items-start justify-between gap-8 bg-white px-5 py-14 text-black sm:flex-row sm:items-end sm:px-10">
           <div>
-            <p className="eyebrow">¿Ya sabes qué quieres?</p>
+            <p className="eyebrow">Reserva en línea</p>
             <h2 className="display mt-3 text-5xl sm:text-6xl">
-              Toma tu lugar.
+              Agenda tu cita
             </h2>
           </div>
           <Link
             className="btn !border-black bg-black text-white hover:!bg-white hover:!text-black"
             href="/agendar"
           >
-            Agenda →
+            Agenda tu cita →
           </Link>
         </section>
       </main>

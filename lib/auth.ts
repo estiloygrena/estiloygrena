@@ -2,12 +2,13 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { SignJWT, jwtVerify } from "jose";
+import { requiredServerEnv } from "@/lib/env";
 
 const COOKIE_NAME = "eg_admin";
 const attempts = new Map<string, { count: number; resetAt: number }>();
 
 function secret() {
-  const value = process.env.ADMIN_SESSION_SECRET;
+  const value = requiredServerEnv("ADMIN_SESSION_SECRET");
   if (!value || value.length < 32) throw new Error("ADMIN_SESSION_SECRET debe tener al menos 32 caracteres.");
   return new TextEncoder().encode(value);
 }
@@ -29,8 +30,8 @@ export async function checkLoginRateLimit() {
 }
 
 export function validateAdminCredentials(username: string, password: string) {
-  const expectedUser = process.env.ADMIN_USERNAME;
-  const expectedPassword = process.env.ADMIN_PASSWORD;
+  const expectedUser = requiredServerEnv("ADMIN_USERNAME");
+  const expectedPassword = requiredServerEnv("ADMIN_PASSWORD");
   return Boolean(expectedUser && expectedPassword && safeEqual(username, expectedUser) && safeEqual(password, expectedPassword));
 }
 

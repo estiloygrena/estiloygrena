@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { HaircutImage } from "@/components/haircut-image";
 import {
   deleteGalleryAction,
   moveGalleryAction,
@@ -14,8 +14,8 @@ export default async function GalleryAdminPage() {
   });
   return (
     <main className="p-5 sm:p-8">
-      <p className="eyebrow">Cloudflare R2 / Archivo</p>
-      <h1 className="display mt-2 text-5xl sm:text-7xl">Galería.</h1>
+      <p className="eyebrow">Fotos del salón</p>
+      <h1 className="display mt-2 text-5xl sm:text-7xl">Galería</h1>
       <form
         action={uploadGalleryAction}
         className="mt-8 grid gap-4 border-2 border-black bg-white p-5 sm:grid-cols-2"
@@ -42,7 +42,7 @@ export default async function GalleryAdminPage() {
           <input type="checkbox" name="featured" /> <b>Destacada</b>
         </label>
         <SubmitButton className="btn !border-black bg-black text-white sm:col-span-2" pendingText="Subiendo imagen…">
-          Subir a R2
+          Subir imagen
         </SubmitButton>
       </form>
       <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -52,8 +52,8 @@ export default async function GalleryAdminPage() {
             key={image.id}
           >
             <div className="relative aspect-[4/5] bg-black">
-              <Image
-                className="object-cover grayscale"
+              <HaircutImage
+                className="object-contain"
                 src={image.url}
                 alt={image.alt ?? "Imagen de galería"}
                 fill
@@ -112,11 +112,11 @@ export default async function GalleryAdminPage() {
         ))}
         {!images.length && (
           <div className="border-2 border-black bg-white p-8 sm:col-span-2 xl:col-span-3">
-            <p className="eyebrow opacity-45">Archivo vacío</p>
-            <h2 className="display mt-3 text-4xl">Sube la primera foto.</h2>
+            <p className="eyebrow opacity-45">Sin fotos</p>
+            <h2 className="display mt-3 text-4xl">Sube una imagen</h2>
             <p className="mt-4 max-w-lg text-black/55">
-              Las imágenes activas aparecerán en la portada, la galería y los
-              collages laterales.
+              Las imágenes activas aparecen en la galería y en la sección
+              de trabajos de la página de inicio.
             </p>
           </div>
         )}

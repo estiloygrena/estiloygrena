@@ -1,7 +1,6 @@
 import { DateTime, Interval } from "luxon";
 import type { AppointmentStatus, ExceptionType } from "@prisma/client";
-import { db } from "@/lib/db";
-import { ACTIVE_APPOINTMENT_STATUSES, DEFAULT_SLOT_INTERVAL, SALON_TIMEZONE } from "@/lib/constants";
+import { ACTIVE_APPOINTMENT_STATUSES, SALON_TIMEZONE, validSlotInterval } from "@/lib/constants";
 
 export type TimeWindow = { start: DateTime; end: DateTime };
 type WeeklyRow = { weekday: number; startTime: string; endTime: string };
@@ -43,8 +42,9 @@ export function calculateAvailableSlots(input: {
     return true;
   }).map((item) => Interval.fromDateTimes(DateTime.fromJSDate(item.startAt), DateTime.fromJSDate(item.endAt)));
   const slots: string[] = [];
+  const intervalMinutes = validSlotInterval(input.slotIntervalMinutes);
   for (const window of getWorkingWindows(input.date, input.weekly, input.exceptions)) {
-    for (let cursor = window.start; cursor.plus({ minutes: input.durationMinutes }) <= window.end; cursor = cursor.plus({ minutes: input.slotIntervalMinutes ?? DEFAULT_SLOT_INTERVAL })) {
+    for (let cursor = window.start; cursor.plus({ minutes: input.durationMinutes }) <= window.end; cursor = cursor.plus({ minutes: intervalMinutes })) {
       const candidate = Interval.fromDateTimes(cursor, cursor.plus({ minutes: input.durationMinutes }));
       if (cursor > now && !busy.some((interval) => interval.overlaps(candidate))) slots.push(cursor.toFormat("HH:mm"));
     }
@@ -53,6 +53,7 @@ export function calculateAvailableSlots(input: {
 }
 
 export async function getAvailability(date: string, serviceId: string, excludeAppointmentId?: string) {
+  const { db } = await import("@/lib/db");
   await db.appointment.updateMany({
     where: { status: "PENDING", paymentStatus: "PENDING", pendingExpiresAt: { lt: new Date() } },
     data: { status: "CANCELLED", paymentStatus: "FAILED" },
@@ -69,7 +70,7 @@ export async function getAvailability(date: string, serviceId: string, excludeAp
     db.siteSetting.findUnique({ where: { key: "slotIntervalMinutes" } }),
   ]);
   if (!service) return [];
-  return calculateAvailableSlots({ date, durationMinutes: service.durationMinutes, slotIntervalMinutes: Number(intervalSetting?.value) || DEFAULT_SLOT_INTERVAL, weekly, exceptions, blocked, appointments });
+  return calculateAvailableSlots({ date, durationMinutes: service.durationMinutes, slotIntervalMinutes: validSlotInterval(intervalSetting?.value), weekly, exceptions, blocked, appointments });
 }
 
 export function localSlotToUtc(date: string, time: string, durationMinutes: number) {

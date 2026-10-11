@@ -114,7 +114,7 @@ export function BookingWizard({
         setError(
           reason instanceof Error
             ? reason.message
-            : "No pudimos consultar la agenda.",
+            : "No pudimos consultar los horarios. Intenta de nuevo.",
         );
     } finally {
       if (requestId === requestNumber.current) setLoadingSlots(false);
@@ -175,11 +175,11 @@ export function BookingWizard({
         error?: string;
       };
       if (!response.ok || !result.redirectUrl)
-        throw new Error(result.error || "No pudimos crear la cita.");
+        throw new Error(result.error || "No pudimos reservar tu cita. Intenta de nuevo.");
       window.location.assign(result.redirectUrl);
     } catch (reason) {
       setError(
-        reason instanceof Error ? reason.message : "No pudimos crear la cita.",
+        reason instanceof Error ? reason.message : "No pudimos reservar tu cita. Intenta de nuevo.",
       );
       setSubmitting(false);
     }
@@ -195,18 +195,18 @@ export function BookingWizard({
     return (
       <section className="grid min-h-[540px] place-items-center border-2 border-white/40 p-6 text-center">
         <div>
-          <p className="eyebrow text-white/45">Agenda temporalmente cerrada</p>
+          <p className="eyebrow text-white/45">Reservas en línea</p>
           <h1 className="display mt-4 text-5xl sm:text-7xl">
-            Sin horarios
+            No disponibles
             <br />
-            publicados.
+            por ahora
           </h1>
           <p className="mx-auto mt-6 max-w-md text-white/60">
-            Todavía no hay servicios activos para reservar. Puedes volver al
-            inicio o escribirnos desde la sección de contacto.
+            Por ahora no hay servicios disponibles para reservar en línea.
+            Contáctanos para consultar.
           </p>
           <Link className="btn mt-8" href="/#contacto">
-            Ir a contacto →
+            Contacto →
           </Link>
         </div>
       </section>
@@ -216,7 +216,7 @@ export function BookingWizard({
     <div>
       <ol
         className="mb-10 grid grid-cols-3 border border-white/40 sm:grid-cols-6"
-        aria-label="Progreso de reserva"
+        aria-label="Pasos para agendar tu cita"
       >
         {steps.map((label, index) => (
           <li
@@ -234,7 +234,7 @@ export function BookingWizard({
           <motion.section key="service" {...panel}>
             <p className="eyebrow text-white/50">Paso 01 / Servicio</p>
             <h1 className="display mt-3 text-5xl sm:text-7xl">
-              Elige tu corte.
+              Selecciona un servicio
             </h1>
             <div className="mt-8 grid gap-3">
               {services.map((service) => {
@@ -279,10 +279,10 @@ export function BookingWizard({
         {step === 1 && (
           <motion.section key="date" {...panel}>
             <p className="eyebrow text-white/50">Paso 02 / Fecha</p>
-            <h1 className="display mt-3 text-5xl sm:text-7xl">Elige el día.</h1>
+            <h1 className="display mt-3 text-5xl sm:text-7xl">Elige una fecha</h1>
             <p className="mt-5 text-white/60">
-              La disponibilidad depende de los{" "}
-              {selectedService?.durationMinutes} minutos que requiere{" "}
+              La duración es de{" "}
+              {selectedService?.durationMinutes} minutos para{" "}
               {selectedService?.name}.
             </p>
             <label className="mt-8 block">
@@ -310,20 +310,20 @@ export function BookingWizard({
         {step === 2 && (
           <motion.section key="time" {...panel}>
             <p className="eyebrow text-white/50">Paso 03 / Horario</p>
-            <h1 className="display mt-3 text-5xl sm:text-7xl">Toma tu hora.</h1>
+            <h1 className="display mt-3 text-5xl sm:text-7xl">Elige un horario</h1>
             <div className="mt-8" aria-live="polite" aria-busy={loadingSlots}>
               {loadingSlots ? (
                 <div className="border border-white/40 p-6 text-sm uppercase tracking-wider">
                   <div className="loading-bar mb-4" />
-                  Consultando agenda…
+                  Consultando horarios…
                 </div>
               ) : slots.length === 0 ? (
                 <div className="border border-white/40 p-6 text-sm text-white/60">
                   <b className="mb-2 block text-white">
-                    Ese día está lleno o cerrado.
+                    No hay horarios disponibles ese día.
                   </b>
-                  Regresa y prueba otra fecha; los horarios cambian según la
-                  duración del servicio.
+                  Regresa al paso anterior y
+                  elige otra fecha.
                 </div>
               ) : (
                 <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
@@ -345,7 +345,7 @@ export function BookingWizard({
         {step === 3 && (
           <motion.section key="details" {...panel}>
             <p className="eyebrow text-white/50">Paso 04 / Tus datos</p>
-            <h1 className="display mt-3 text-5xl sm:text-7xl">¿Quién eres?</h1>
+            <h1 className="display mt-3 text-5xl sm:text-7xl">Tus datos</h1>
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
               <label>
                 <span className="label">Nombre *</span>
@@ -369,7 +369,7 @@ export function BookingWizard({
                 />
               </label>
               <label>
-                <span className="label">Correo</span>
+                <span className="label">Correo (opcional)</span>
                 <input
                   className="field"
                   type="email"
@@ -379,7 +379,7 @@ export function BookingWizard({
                 />
               </label>
               <label>
-                <span className="label">Instagram</span>
+                <span className="label">Instagram (opcional)</span>
                 <input
                   className="field"
                   placeholder="@usuario"
@@ -388,10 +388,10 @@ export function BookingWizard({
                 />
               </label>
               <label className="sm:col-span-2">
-                <span className="label">Notas</span>
+                <span className="label">Notas (opcional)</span>
                 <textarea
                   className="field min-h-28"
-                  placeholder="Cuéntanos sobre tu pelo, referencias o accesibilidad."
+                  placeholder="Comparte tus referencias o cualquier información útil para tu cita."
                   value={form.notes}
                   onChange={(event) => update("notes", event.target.value)}
                 />
@@ -403,7 +403,7 @@ export function BookingWizard({
           <motion.section key="payment" {...panel}>
             <p className="eyebrow text-white/50">Paso 05 / Forma de pago</p>
             <h1 className="display mt-3 text-5xl sm:text-7xl">
-              ¿Cómo quieres pagar?
+              Forma de pago
             </h1>
             {selectedService?.pricingType === "QUOTE" ? (
               <div className="mt-8 border-2 border-white p-6">
@@ -412,18 +412,18 @@ export function BookingWizard({
                   {priceLabel}
                 </h2>
                 <p className="mt-3 max-w-xl text-white/65">
-                  Puedes reservar tu horario ahora. Nos pondremos en contacto
-                  contigo para confirmar el precio; este servicio no genera
-                  cobro en línea.
+                  Reserva tu horario y consulta el precio con el salón
+                  antes de tu cita. Este servicio no requiere
+                  pago en línea.
                 </p>
-                <a
+                {whatsappNumber && <a
                   className="btn mt-6"
                   href={quoteWhatsAppUrl}
                   target="_blank"
                   rel="noreferrer"
                 >
                   Cotizar por WhatsApp ↗
-                </a>
+                </a>}
               </div>
             ) : (
               <div className="mt-8 grid gap-3 sm:grid-cols-2">
@@ -442,7 +442,7 @@ export function BookingWizard({
                 >
                   <b className="block uppercase">Pagar en el local</b>
                   <small className="mt-2 block opacity-60">
-                    Efectivo / pago presencial
+                    Pago en efectivo
                   </small>
                 </button>
               </div>
@@ -453,7 +453,7 @@ export function BookingWizard({
           <motion.section key="confirm" {...panel}>
             <p className="eyebrow text-white/50">Paso 06 / Confirmación</p>
             <h1 className="display mt-3 text-5xl sm:text-7xl">
-              Revisa el corte.
+              Confirma tu cita
             </h1>
             <dl className="mt-8 grid grid-cols-2 border-y border-white/40 py-5 text-sm">
               <dt className="text-white/50">Servicio</dt>
@@ -476,7 +476,7 @@ export function BookingWizard({
               <dd className="mt-3 text-right text-lg font-black">
                 {priceLabel}
               </dd>
-              <dt className="mt-3 text-white/50">Pago</dt>
+              <dt className="mt-3 text-white/50">Forma de pago</dt>
               <dd className="mt-3 text-right">
                 {selectedService?.pricingType === "QUOTE"
                   ? "Por definir"
@@ -487,7 +487,7 @@ export function BookingWizard({
             </dl>
             {selectedService?.pricingType === "QUOTE" && (
               <p className="mt-5 border border-white/40 p-4 text-sm text-white/65">
-                El precio se confirmará por WhatsApp. Al reservar no se
+                El precio se confirmará con el salón. Al reservar no se
                 realizará ningún cobro.
               </p>
             )}
@@ -523,10 +523,10 @@ export function BookingWizard({
             {submitting
               ? "Reservando…"
               : selectedService?.pricingType === "QUOTE"
-                ? "Reservar horario"
+                ? "Confirmar cita"
                 : form.paymentMethod === "CASH"
                   ? "Confirmar cita"
-                  : "Confirmar e ir a pagar"}
+                  : "Confirmar y pagar"}
           </button>
         )}
       </div>

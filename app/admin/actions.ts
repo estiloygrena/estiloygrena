@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { assertAdmin, checkLoginRateLimit, clearAdminSession, createAdminSession, validateAdminCredentials } from "@/lib/auth";
 import { deleteImageObject, uploadImage } from "@/lib/r2";
+import { createGalleryImage, deleteGalleryImage, toggleGalleryImage, moveGalleryImage, deleteUnusedImageObject } from "@/lib/gallery-management";
+import { safeErrorCode } from "@/lib/env";
 import { getAvailability, localSlotToUtc } from "@/lib/availability";
 import { loginSchema, serviceSchema } from "@/lib/validation";
 import { slugify } from "@/lib/format";
@@ -30,9 +32,11 @@ export async function saveServiceAction(formData: FormData) {
   const removeImage = formData.get("removeImage") === "on";
   const imageData = uploaded ? { imageKey: uploaded.objectKey, imageUrl: uploaded.url } : removeImage ? { imageKey: null, imageUrl: null } : {};
   const data = { name, description, pricingType, priceCents, quoteLabel, durationMinutes, displayOrder, isActive, ...imageData };
-  if (id) await db.service.update({ where: { id }, data });
-  else await db.service.create({ data: { ...data, slug: `${slugify(name)}-${Date.now().toString(36)}` } });
-  if (previous?.imageKey && (uploaded || removeImage)) await deleteImageObject(previous.imageKey).catch((error) => console.error("service_image_cleanup_failed", error));
+  try {
+    if (id) await db.service.update({ where: { id }, data });
+    else await db.service.create({ data: { ...data, slug: `${slugify(name)}-${Date.now().toString(36)}` } });
+  } catch (error) { if (uploaded) await deleteImageObject(uploaded.objectKey); throw error; }
+  if (previous?.imageKey && (uploaded || removeImage)) await deleteUnusedImageObject(previous.imageKey).catch((error) => console.error("service_image_cleanup_failed", safeErrorCode(error)));
   revalidatePath("/"); revalidatePath("/servicios"); revalidatePath("/agendar"); revalidatePath("/admin/servicios");
 }
 export async function archiveServiceAction(formData: FormData) { await assertAdmin(); await db.service.update({ where: { id: String(formData.get("id")) }, data: { isActive: false } }); revalidatePath("/"); revalidatePath("/admin/servicios"); }
@@ -72,21 +76,22 @@ export async function deleteBlockAction(formData: FormData) { await assertAdmin(
 
 export async function uploadGalleryAction(formData: FormData) {
   await assertAdmin(); const file = formData.get("file"); if (!(file instanceof File) || file.size === 0) throw new Error("Selecciona una imagen.");
-  const uploaded = await uploadImage(file); await db.galleryImage.create({ data: { ...uploaded, alt: String(formData.get("alt") ?? "").slice(0, 180) || null, isFeatured: formData.get("featured") === "on", displayOrder: await db.galleryImage.count() } }); revalidatePath("/"); revalidatePath("/admin/galeria");
+  await createGalleryImage(file, String(formData.get("alt") ?? "").slice(0, 180) || null, formData.get("featured") === "on"); revalidatePath("/"); revalidatePath("/galeria"); revalidatePath("/admin/galeria");
 }
-export async function deleteGalleryAction(formData: FormData) { await assertAdmin(); const image = await db.galleryImage.delete({ where: { id: String(formData.get("id")) } }); await deleteImageObject(image.objectKey); revalidatePath("/"); revalidatePath("/admin/galeria"); }
-export async function toggleGalleryAction(formData: FormData) { await assertAdmin(); const id = String(formData.get("id")); const image = await db.galleryImage.findUniqueOrThrow({ where: { id } }); await db.galleryImage.update({ where: { id }, data: { isActive: !image.isActive } }); revalidatePath("/"); revalidatePath("/admin/galeria"); }
+export async function deleteGalleryAction(formData: FormData) { await assertAdmin(); await deleteGalleryImage(String(formData.get("id"))); revalidatePath("/"); revalidatePath("/galeria"); revalidatePath("/admin/galeria"); }
+export async function toggleGalleryAction(formData: FormData) { await assertAdmin(); await toggleGalleryImage(String(formData.get("id"))); revalidatePath("/"); revalidatePath("/galeria"); revalidatePath("/admin/galeria"); }
 export async function moveGalleryAction(formData: FormData) {
   await assertAdmin();
   const id = String(formData.get("id"));
   const direction = String(formData.get("direction")) === "up" ? -1 : 1;
-  const image = await db.galleryImage.findUniqueOrThrow({ where: { id } });
-  const neighbor = await db.galleryImage.findFirst({ where: direction < 0 ? { displayOrder: { lt: image.displayOrder } } : { displayOrder: { gt: image.displayOrder } }, orderBy: { displayOrder: direction < 0 ? "desc" : "asc" } });
-  if (neighbor) await db.$transaction([db.galleryImage.update({ where: { id: image.id }, data: { displayOrder: neighbor.displayOrder } }), db.galleryImage.update({ where: { id: neighbor.id }, data: { displayOrder: image.displayOrder } })]);
-  revalidatePath("/"); revalidatePath("/admin/galeria");
+  await moveGalleryImage(id, direction);
+  revalidatePath("/"); revalidatePath("/galeria"); revalidatePath("/admin/galeria");
 }
 
 export async function saveSettingsAction(formData: FormData) {
-  await assertAdmin(); const allowed = ["salonName", "tagline", "address", "instagramUrl", "whatsappNumber", "googleMapsUrl", "slotIntervalMinutes", "cancellationPolicy"];
+  await assertAdmin();
+  const interval = Number(formData.get("slotIntervalMinutes"));
+  if (!Number.isInteger(interval) || interval < 1 || interval > 240) throw new Error("El intervalo debe ser un entero entre 1 y 240 minutos.");
+  const allowed = ["salonName", "tagline", "address", "instagramUrl", "whatsappNumber", "googleMapsUrl", "slotIntervalMinutes", "cancellationPolicy"];
   await db.$transaction(allowed.map((key) => db.siteSetting.upsert({ where: { key }, update: { value: String(formData.get(key) ?? "").slice(0, 2000) }, create: { key, value: String(formData.get(key) ?? "").slice(0, 2000) } }))); revalidatePath("/"); revalidatePath("/admin/configuracion");
 }

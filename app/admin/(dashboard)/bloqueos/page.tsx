@@ -10,8 +10,8 @@ export default async function BlocksPage() {
   });
   return (
     <main className="p-5 sm:p-8">
-      <p className="eyebrow">Vacaciones / Tiempo personal</p>
-      <h1 className="display mt-2 text-5xl sm:text-7xl">Bloqueos.</h1>
+      <p className="eyebrow">Periodos no disponibles</p>
+      <h1 className="display mt-2 text-5xl sm:text-7xl">Bloqueos</h1>
       <form
         action={createBlockAction}
         className="mt-8 grid gap-4 border-2 border-black bg-white p-5 sm:grid-cols-3"

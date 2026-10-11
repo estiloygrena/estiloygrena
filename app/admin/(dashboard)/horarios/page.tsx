@@ -16,21 +16,21 @@ export default async function SchedulePage() {
   ]);
   return (
     <main className="p-5 sm:p-8">
-      <p className="eyebrow">Agenda base + excepciones</p>
-      <h1 className="display mt-2 text-5xl sm:text-7xl">Horarios.</h1>
+      <p className="eyebrow">Horario semanal y excepciones</p>
+      <h1 className="display mt-2 text-5xl sm:text-7xl">Horarios</h1>
       <form action={replaceScheduleAction} className="mt-8">
         <p className="mb-5 max-w-2xl text-sm text-black/60">
-          Define uno o varios bloques por día. El espacio entre bloques funciona
-          como descanso y nunca se muestra como disponible.
+          Agrega uno o varios horarios por día. El tiempo entre ellos
+          no estará disponible para citas.
         </p>
         <ScheduleEditor initial={weekly} />
         <SubmitButton className="btn mt-5 !border-black bg-black text-white" pendingText="Guardando horario…">
-          Guardar semana
+          Guardar horarios
         </SubmitButton>
       </form>
       <section className="mt-12">
-        <p className="eyebrow opacity-50">Fechas que rompen la rutina</p>
-        <h2 className="display mt-2 text-4xl">Excepciones.</h2>
+        <p className="eyebrow opacity-50">Cambios para fechas específicas</p>
+        <h2 className="display mt-2 text-4xl">Excepciones</h2>
         <form
           action={createExceptionAction}
           className="mt-4 grid gap-3 border-2 border-black bg-white p-5 sm:grid-cols-2 xl:grid-cols-5"

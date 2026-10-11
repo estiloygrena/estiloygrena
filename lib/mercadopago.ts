@@ -1,7 +1,8 @@
 import { MercadoPagoConfig, Payment, Preference } from "mercadopago";
+import { requiredServerEnv } from "@/lib/env";
 
 function client() {
-  const accessToken = process.env.MERCADO_PAGO_ACCESS_TOKEN;
+  const accessToken = requiredServerEnv("MERCADO_PAGO_ACCESS_TOKEN");
   if (!accessToken) throw new Error("MERCADO_PAGO_ACCESS_TOKEN no está configurado.");
   return new MercadoPagoConfig({ accessToken });
 }

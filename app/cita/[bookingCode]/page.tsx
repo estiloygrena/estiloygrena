@@ -15,7 +15,7 @@ const statusLabels = {
 const paymentLabels = {
   PENDING: "Pendiente",
   PAID: "Pagado",
-  FAILED: "Fallido",
+  FAILED: "No completado",
   REFUNDED: "Reembolsado",
   NOT_REQUIRED: "Pago en el local",
 };
@@ -64,8 +64,8 @@ export default async function AppointmentPage({
         </p>
         <h1 className="display mt-4 text-6xl sm:text-8xl">
           {appointment.status === "CONFIRMED"
-            ? "Nos vemos pronto."
-            : "Estado de tu cita."}
+            ? "Cita confirmada"
+            : "Estado de tu cita"}
         </h1>
         <p className="mt-6 text-xl">Hola, {appointment.customerName}.</p>
         <dl className="mt-10 grid border-t-2 border-white sm:grid-cols-2">
@@ -76,7 +76,7 @@ export default async function AppointmentPage({
             ["Duración", `${appointment.serviceDurationSnapshot} min`],
             ["Precio", priceDisplay],
             [
-              "Método",
+              "Forma de pago",
               appointment.paymentMethod === "QUOTE"
                 ? "Por definir"
                 : appointment.paymentMethod === "CASH"
@@ -100,25 +100,26 @@ export default async function AppointmentPage({
             <span className="status-stamp">Servicio con cotización</span>
             <h2 className="mt-4 text-2xl font-black uppercase">{priceDisplay}</h2>
             <p className="mt-3 text-sm text-white/65">
-              Tu horario está reservado. Escríbenos para confirmar el precio antes de tu cita.
+              Tu horario está reservado. Confirma el precio con el salón antes de tu cita.
             </p>
-            <a className="btn btn-light mt-5" href={whatsappUrl} target="_blank" rel="noreferrer">
+            {settings.whatsappNumber && <a className="btn btn-light mt-5" href={whatsappUrl} target="_blank" rel="noreferrer">
               Cotizar por WhatsApp ↗
-            </a>
+            </a>}
           </div>
         )}
         <div className="mt-10 border border-white/40 p-5">
-          <p className="font-bold">¿Necesitas mover o cancelar?</p>
+          <p className="font-bold">¿Necesitas cambiar o cancelar tu cita?</p>
           <p className="mt-2 text-sm text-white/60">
-            Escríbenos por WhatsApp e incluye tu código{" "}
+            Contacta al salón e incluye tu código{" "}
             {appointment.bookingCode}.
           </p>
-          <a
+          {settings.whatsappNumber && <a
             className="btn mt-5"
             href={whatsappUrl}
           >
             Abrir WhatsApp ↗
-          </a>
+          </a>}
+          {!settings.whatsappNumber && settings.instagramUrl && <a className="btn mt-5" href={settings.instagramUrl}>Contactar por Instagram ↗</a>}
         </div>
       </main>
     </PublicShell>

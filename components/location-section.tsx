@@ -17,7 +17,7 @@ export function LocationSection({
     >
       <Reveal>
         <p className="eyebrow text-white/55">05 / Visítanos</p>
-        <h2 className="display mt-4 text-6xl sm:text-8xl">Ubicación.</h2>
+        <h2 className="display mt-4 text-6xl sm:text-8xl">Ubicación</h2>
       </Reveal>
       <div className="mt-12 grid border-2 border-white lg:grid-cols-[.72fr_1.28fr]">
         <Reveal className="flex min-h-72 flex-col justify-between border-b-2 border-white p-6 sm:p-8 lg:min-h-full lg:border-b-0 lg:border-r-2">

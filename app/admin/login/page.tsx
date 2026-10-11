@@ -14,14 +14,14 @@ export default async function LoginPage({
   return (
     <main className="login-surface relative grid min-h-screen place-items-center overflow-hidden bg-[var(--paper)] p-5 text-black">
       <span className="display pointer-events-none absolute -left-10 top-8 rotate-[-8deg] text-[18vw] text-black/[.035]">
-        BACKSTAGE
+        ADMIN
       </span>
       <form
         action={loginAction}
         className="relative w-full max-w-md border-4 border-black bg-white p-7 shadow-[12px_12px_0_#000]"
       >
-        <p className="eyebrow">Acceso restringido / Solo staff</p>
-        <h1 className="display mt-3 text-5xl">Backstage.</h1>
+        <p className="eyebrow">Panel de administración</p>
+        <h1 className="display mt-3 text-5xl">Iniciar sesión</h1>
         {error && (
           <p
             className="mt-5 border-2 border-black bg-black p-3 text-sm font-bold text-white"
@@ -56,7 +56,7 @@ export default async function LoginPage({
           pendingText="Entrando…"
           type="submit"
         >
-          Entrar →
+          Iniciar sesión →
         </SubmitButton>
         <Link
           className="mt-5 block text-center text-xs font-bold uppercase underline"
